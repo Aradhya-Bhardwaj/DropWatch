@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Attendance watchlist{% endblock %}
+{% block heading %}Attendance watchlist{% endblock %}
+{% block subheading %}<p>{{ total }} students in {{ current_year }} stayed below 60% attendance for the last three recorded months. They are still on the roll: reach them before they leave.</p>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  {% if rows.total %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Student</th><th>Class</th><th>School</th><th>Attendance, April to now</th><th class="num">Latest</th><th class="num">Fall</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows.items %}
+      <tr>
+        <td>{{ r.e.student.name }}<br><span class="muted small">{{ r.e.student.get_gender_display|slice:":-1" }}, {{ r.e.student.get_category_display }}, {{ r.e.student.distance_km }} km away</span></td>
+        <td>{{ r.e.standard }}</td>
+        <td><a href="{% url 'analytics:school_detail' r.e.school.udise_code %}">{{ r.e.school.name }}</a><br><span class="muted small">{{ r.e.school.block.district.name }}</span></td>
+        <td><span class="spark" aria-label="Monthly attendance">{% for m in r.months %}<i class="{% if m.pct < 60 %}low{% endif %}" style="height:{{ m.pct }}%" title="{{ m.get_month_display }}: {{ m.pct }}%"></i>{% endfor %}</span></td>
+        <td class="num"><strong>{{ r.latest }}%</strong></td>
+        <td class="num"><span class="delta up">−{{ r.drop }}</span></td>
+        <td>{% if perms.students.add_exitrecord %}<a class="btn small secondary" href="{% url 'students:exit' r.e.pk %}">Record exit</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "partials/pager.html" with page=rows %}
+  {% else %}
+    <div class="empty"><h2>No one on the watchlist</h2><p>Every student in this group attended at least 60% of the time in one of the last three months.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

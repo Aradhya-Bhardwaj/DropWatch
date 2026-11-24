@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Record exit{% endblock %}
+{% block heading %}Record that {{ e.student.name }} left{% endblock %}
+{% block subheading %}<p>Class {{ e.standard }}, {{ e.school.name }}, {{ e.year }}.</p>{% endblock %}
+
+{% block content %}
+<div class="grid-3-1">
+  <section class="panel form">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% include "partials/field.html" with field=form.left_as %}
+      {% include "partials/field.html" with field=form.reason %}
+      {% include "partials/field.html" with field=form.to_school %}
+      {% include "partials/field.html" with field=form.exit_date %}
+      {% include "partials/field.html" with field=form.notes %}
+      {% include "partials/field.html" with field=form.verified %}
+      <div class="form-actions">
+        <button class="btn" type="submit">Save exit record</button>
+        <a class="btn quiet" href="{% url 'students:list' %}">Cancel</a>
+      </div>
+    </form>
+  </section>
+  <aside class="panel">
+    <h2>Before you save</h2>
+    <p class="small">If the student moved to another school, choose “Moved to another school” and pick it. Transfers are not dropouts, and the new school confirms them when it enrols the student.</p>
+    <p class="small">A dropout needs a reason. The reason decides which scheme DropWatch suggests for students like this one.</p>
+    {% if months %}
+    <h3>Attendance this year</h3>
+    <table class="data small"><tbody>{% for m in months %}<tr><td>{{ m.get_month_display }}</td><td class="num">{% if m.pct < 60 %}<strong class="delta up">{{ m.pct }}%</strong>{% else %}{{ m.pct }}%{% endif %}</td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

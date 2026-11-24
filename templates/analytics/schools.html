@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}By school{% endblock %}
+{% block heading %}Dropout by school{% endblock %}
+{% block subheading %}<p>Schools ranked by dropout rate, compared with their own block.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'analytics:export' 'school' %}">Download CSV</a>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<div class="grid-3-1">
+  <section class="panel">
+    <h2>The 15 schools losing the most students</h2>
+    <p class="lead">Dashed line: overall rate for the current filters.</p>
+    <div class="chart-box tall"><canvas data-chart="hbar" data-source="school-chart" role="img" aria-label="Schools with the highest dropout"></canvas></div>
+    {{ chart|json_script:"school-chart" }}
+  </section>
+  <div>
+    <section class="panel">
+      <h2>{{ struggling|length }} schools at 1.5× their block</h2>
+      <p class="lead">A school far above its neighbours points to a school problem, not an area problem: staffing, facilities or leadership.</p>
+      <ul style="margin:0;padding-left:18px">
+        {% for r in struggling|slice:":6" %}
+          <li><a href="{% url 'analytics:school_detail' r.school__udise_code %}">{{ r.school__name }}</a> <span class="muted small">{{ r.vs_block }}× block</span></li>
+        {% empty %}<li class="muted">None for these filters.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>Girls' toilets matter</h2>
+      <p class="lead">Dropout among girls in Class 6 and above.</p>
+      <div style="display:flex;justify-content:space-between"><span>No separate toilet</span><strong>{{ no_toilet.text }}</strong></div>
+      <div class="bar alert" style="margin-bottom:10px"><span style="width:{{ no_toilet.width }}%"></span></div>
+      <div style="display:flex;justify-content:space-between"><span>Has a separate toilet</span><strong>{{ with_toilet.text }}</strong></div>
+      <div class="bar"><span style="width:{{ with_toilet.width }}%"></span></div>
+      <p class="panel-foot muted">{{ no_toilet.enrolled }} girls study at schools without one.</p>
+    </section>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>All schools</h2>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th class="rank">#</th><th>School</th><th>Block</th><th>Type</th><th class="num">Students</th><th class="num">Left</th><th class="num">Rate</th><th class="num">Block rate</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rows.items %}
+      <tr>
+        <td class="rank">{{ rows.start_index|add:forloop.counter0 }}</td>
+        <td><a href="{% url 'analytics:school_detail' r.school__udise_code %}">{{ r.school__name }}</a>{% if not r.school__has_girls_toilet %} <span class="tag" title="No separate girls' toilet">No girls' toilet</span>{% endif %}</td>
+        <td>{{ r.school__block__name }}</td>
+        <td class="muted small">{{ r.type_label }}</td>
+        <td class="num">{{ r.enrolled }}</td>
+        <td class="num">{{ r.dropped }}</td>
+        <td class="heat" style="{{ r.heat }}">{{ r.text }}</td>
+        <td class="num muted">{{ r.block_text }}</td>
+        <td>{% if r.vs_block and r.vs_block >= 1.5 %}<span class="tag alert">{{ r.vs_block }}× block</span>{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9" class="empty">No schools match these filters.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "partials/pager.html" with page=rows %}
+</section>
+{% endblock %}

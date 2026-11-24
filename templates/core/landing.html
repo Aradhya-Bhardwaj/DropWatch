@@ -1,0 +1,62 @@
+{% extends "base_public.html" %}
+{% block title %}DropWatch: see who is leaving school, and why{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    {% if hero %}
+      <h1>In {{ year }}, {{ left }} of every 100 {{ hero_phrase }} left school.</h1>
+      <p class="lede">The state average was {{ overall }}%. DropWatch finds groups like this one by school, area, gender, social category and class, then matches each to the scheme most likely to keep those children in school.</p>
+    {% else %}
+      <h1>See who is leaving school, and why.</h1>
+      <p class="lede">Upload student records to see dropout by school, area, gender, social category and class.</p>
+    {% endif %}
+    <div class="cta">
+      <a class="btn" href="{% url 'core:login' %}">Sign in to the dashboard</a>
+      <a class="btn secondary" href="{% url 'core:about' %}">How DropWatch works</a>
+    </div>
+  </div>
+
+  {% if hero %}
+  <figure class="register" aria-label="{{ left }} of 100 children left school">
+    <div class="register-grid">
+      {% for i in dots %}<span{% if i < left %} class="left" style="--i:{{ i }}"{% endif %}></span>{% endfor %}
+    </div>
+    <figcaption>
+      <span><span class="key"><i></i> Still in school</span> &nbsp; <span class="key"><i class="left"></i> Left during {{ year }}</span></span>
+      <span>{{ hero.enrolled }} students in this group</span>
+    </figcaption>
+  </figure>
+  {% endif %}
+</section>
+
+<section class="band">
+  <div class="band-inner facts">
+    <div>
+      <span class="figure">{{ students|floatformat:"0g" }}</span>
+      <span>students tracked across 120 schools and four school years</span>
+    </div>
+    {% if primary and secondary %}
+    <div>
+      <span class="figure">{{ primary.rate }}% to {{ secondary.rate }}%</span>
+      <span>dropout climbs from primary classes to Classes 9 and 10, where most children are lost</span>
+    </div>
+    {% endif %}
+    {% if districts %}
+    <div>
+      <span class="figure">{{ districts.0.school__block__district__name }}</span>
+      <span>has the highest district rate this year, at {{ districts.0.rate }}%</span>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section-public">
+  <h2>From a school register to a funded scheme</h2>
+  <ol class="steps" style="padding:0;margin-top:20px">
+    <li><h3>Schools record who left</h3><p class="muted">Teachers upload their roll or mark a student as dropped out or transferred, with the reason.</p></li>
+    <li><h3>DropWatch finds the groups</h3><p class="muted">Rates by school, area, gender, social category and class, and the combinations that stand out.</p></li>
+    <li><h3>Rules suggest a scheme</h3><p class="muted">A hotspot's top reasons decide the match: distance points to bicycles, cost to scholarships.</p></li>
+    <li><h3>Officers track the result</h3><p class="muted">Each recommendation is approved, implemented and checked against the next year's rate.</p></li>
+  </ol>
+</section>
+{% endblock %}

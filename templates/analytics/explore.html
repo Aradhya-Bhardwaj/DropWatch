@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Compare any two{% endblock %}
+{% block heading %}Compare any two dimensions{% endblock %}
+{% block subheading %}<p>Cross two factors to find groups a single view hides, such as SC girls in Class 9.</p>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <form method="get" class="filters" style="border:0;padding:0;margin:0 0 16px">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      {% for field in explore_form %}
+        <div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>
+      {% endfor %}
+      <button class="btn" type="submit">Compare</button>
+    </div>
+    {% if explore_form.non_field_errors %}<p class="filter-errors">{{ explore_form.non_field_errors|join:" " }}</p>{% endif %}
+  </form>
+  <h2>{{ rows_label }} by {{ cols_label|lower }}</h2>
+  <p class="lead">Dropout rate in each cell. Darker cells lose more students. A dash means fewer than 10 students.</p>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>{{ rows_label }}</th>{% for c in table.cols %}<th class="num">{{ c }}</th>{% endfor %}<th class="num">All</th></tr></thead>
+    <tbody>
+    {% for r in table.rows %}
+      <tr><td>{{ r.label }}</td>
+        {% for cell in r.cells %}<td class="heat{% if not cell %} empty{% endif %}" style="{{ cell.heat }}" title="{% if cell %}{{ cell.dropped }} of {{ cell.enrolled }}{% endif %}">{% if cell %}{{ cell.text }}{% else %}–{% endif %}</td>{% endfor %}
+        <td class="num"><strong>{{ r.total.text }}</strong></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

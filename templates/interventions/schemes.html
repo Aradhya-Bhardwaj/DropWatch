@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Schemes and rules{% endblock %}
+{% block heading %}Schemes and matching rules{% endblock %}
+{% block subheading %}<p>A rule suggests its scheme when a hotspot matches every condition it sets. Blank conditions match any group.</p>{% endblock %}
+{% block actions %}{% if user.is_staff %}<a class="btn secondary" href="{% url 'admin:interventions_scheme_changelist' %}">Edit in administration</a>{% endif %}{% endblock %}
+
+{% block content %}
+{% for s in schemes %}
+<section class="panel">
+  <h2>{{ s.name }}</h2>
+  <p class="lead">{{ s.description }} <span class="tag">{{ s.get_level_display }}</span> <span class="tag">₹{{ s.cost_per_student|floatformat:"0g" }} per student</span></p>
+  <table class="data small">
+    <thead><tr><th>Gender</th><th>Category</th><th>Classes</th><th>Area</th><th>Top reason must include</th><th class="num">Priority</th></tr></thead>
+    <tbody>
+    {% for r in s.rules.all %}
+      <tr><td>{{ r.get_gender_display|default:"Any" }}</td><td>{{ r.get_category_display|default:"Any" }}</td><td>{{ r.min_standard }}–{{ r.max_standard }}</td><td>{{ r.get_area_type_display|default:"Any" }}</td><td>{{ r.get_reason_display|default:"Any" }}</td><td class="num">{{ r.priority }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="muted">No rules yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endfor %}
+{% endblock %}

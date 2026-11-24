@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ school.name }}{% endblock %}
+{% block heading %}{{ school.name }}{% endblock %}
+{% block subheading %}<p>UDISE {{ school.udise_code }}, {{ school.block }}. {{ school.get_school_type_display }}, {{ school.get_management_display|lower }}, {{ school.get_area_type_display|lower }}{% if not school.has_girls_toilet %}, no separate girls' toilet{% endif %}.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'students:list' %}?school={{ school.udise_code }}">Student records</a>{% endblock %}
+
+{% block content %}
+<section class="figures">
+  <div{% if above_block %} class="alert"{% endif %}><span class="label">Dropout in {{ year }}</span><span class="figure">{{ summary.text }}</span><span class="note">{{ summary.dropped }} of {{ summary.enrolled }} students</span></div>
+  <div><span class="label">Block average</span><span class="figure">{{ block_summary.text }}</span><span class="note">{% if vs_block %}This school is at {{ vs_block }}× its block{% endif %}</span></div>
+  <div class="alert"><span class="label">On the watchlist now</span><span class="figure">{{ watch_total }}</span><span class="note">low attendance for 3 months</span></div>
+  <div><span class="label">Main reason</span><span class="figure" style="font-size:1.35rem;line-height:1.2">{{ reasons.0.label|default:"None recorded" }}</span><span class="note">{% if reasons %}{{ reasons.0.share }}% of dropouts{% endif %}</span></div>
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Over the years</h2>
+    <div class="chart-box short"><canvas data-chart="line" data-source="school-trend" role="img" aria-label="School dropout by year"></canvas></div>
+    {{ trend|json_script:"school-trend" }}
+  </section>
+  <section class="panel">
+    <h2>Reasons recorded</h2>
+    <table class="data"><tbody>
+      {% for r in reasons %}<tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td style="width:40%"><div class="bar-cell"><div class="bar"><span style="width:{{ r.share }}%"></span></div><span class="val">{{ r.share }}%</span></div></td></tr>{% empty %}<tr><td class="muted">No dropouts recorded this year.</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+</div>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>By class and gender</h2>
+    <table class="data">
+      <thead><tr><th>Class</th><th class="num">Girls</th><th class="num">Boys</th></tr></thead>
+      <tbody>
+      {% for r in by_class %}{% with f=r.F m=r.M %}
+        <tr><td>Class {{ r.standard }}</td><td class="heat" style="{{ f.heat }}">{{ f.text }}</td><td class="heat" style="{{ m.heat }}">{{ m.text }}</td></tr>
+      {% endwith %}{% endfor %}
+      </tbody>
+    </table>
+    <p class="panel-foot muted">A dash means fewer than 10 students in that cell.</p>
+  </section>
+  <section class="panel">
+    <h2>Students to reach this month</h2>
+    {% if watch %}
+    <table class="data"><tbody>
+      {% for r in watch %}<tr><td>{{ r.e.student.name }}</td><td>Class {{ r.e.standard }}</td><td><span class="spark">{% for m in r.months %}<i class="{% if m.pct < 60 %}low{% endif %}" style="height:{{ m.pct }}%"></i>{% endfor %}</span></td><td class="num">{{ r.latest }}%</td></tr>{% endfor %}
+    </tbody></table>
+    {% else %}<p class="muted">No student at this school is on the watchlist.</p>{% endif %}
+  </section>
+</div>
+{% endblock %}

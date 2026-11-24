@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block heading %}{% if school %}{{ school.name }}{% else %}Student records{% endif %}{% endblock %}
+{% block subheading %}{% if school %}<p>{{ year }} roll: {{ counts.total }} students, {{ counts.left }} already left this year.</p>{% else %}<p>Choose a school to see and update its roll for {{ year }}.</p>{% endif %}{% endblock %}
+{% block actions %}
+  {% if school and perms.students.add_student %}
+    <a class="btn" href="{% url 'students:add' %}">Add a student</a>
+    <a class="btn secondary" href="{% url 'students:upload' %}">Upload CSV</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if user_profile.role != "SCHOOL" %}
+<section class="filters">
+  <form method="get">
+    <div style="flex:1;min-width:260px">
+      <label for="school-pick">School</label>
+      <select id="school-pick" name="school">
+        <option value="">Choose a school</option>
+        {% for s in schools %}<option value="{{ s.udise_code }}" {% if s == school %}selected{% endif %}>{{ s.name }}, {{ s.block.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <button class="btn" type="submit">Open</button>
+  </form>
+</section>
+{% endif %}
+
+{% if school %}
+<section class="panel">
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px">
+    <div style="flex:1;min-width:200px"><label class="small muted" for="q">Search by name or ID</label><input type="search" id="q" name="q" value="{{ q }}"></div>
+    <div><label class="small muted" for="std">Class</label>
+      <select id="std" name="standard"><option value="">All</option>{% for c in classes %}<option value="{{ c }}" {% if std == c|stringformat:"d" %}selected{% endif %}>Class {{ c }}</option>{% endfor %}</select></div>
+    <div><label class="small muted" for="st">Status</label>
+      <select id="st" name="status"><option value="">All</option><option value="ENROLLED" {% if status == "ENROLLED" %}selected{% endif %}>Studying</option><option value="DROPPED" {% if status == "DROPPED" %}selected{% endif %}>Dropped out</option><option value="TRANSFERRED" {% if status == "TRANSFERRED" %}selected{% endif %}>Transferred</option></select></div>
+    <button class="btn secondary" type="submit">Search</button>
+  </form>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Name</th><th>Student ID</th><th>Class</th><th>Gender</th><th>Category</th><th class="num">Distance</th><th>Attendance</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for e in page.items %}
+      <tr>
+        <td>{{ e.student.name }}</td>
+        <td class="muted small">{{ e.student.student_uid }}</td>
+        <td>{{ e.standard }}</td>
+        <td>{{ e.student.get_gender_display|slice:":-1" }}</td>
+        <td>{{ e.student.get_category_display }}</td>
+        <td class="num">{{ e.student.distance_km }} km</td>
+        <td><span class="spark">{% for m in e.attendance.all %}<i class="{% if m.pct < 60 %}low{% endif %}" style="height:{{ m.pct }}%" title="{{ m.get_month_display }}: {{ m.pct }}%"></i>{% endfor %}</span></td>
+        <td>{% if e.status == "ENROLLED" %}<span class="tag good">Studying</span>{% elif e.status == "DROPPED" %}<span class="tag alert">Dropped out</span>{% else %}<span class="tag ink">{{ e.get_status_display }}</span>{% endif %}</td>
+        <td>{% if e.status == "ENROLLED" and perms.students.add_exitrecord %}<a class="btn small quiet" href="{% url 'students:exit' e.pk %}">Record exit</a>{% endif %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9"><div class="empty"><p>No students match. Clear the search or <a href="{% url 'students:add' %}">add a student</a>.</p></div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% include "partials/pager.html" %}
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}By class and age{% endblock %}
+{% block heading %}Dropout by class and age{% endblock %}
+{% block subheading %}<p>The classes where children leave, and the moves between stages.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'analytics:export' 'standard' %}">Download CSV</a>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="figures">
+  {% for t in transitions %}
+  <div{% if t.rate and overall.rate and t.rate >= overall.rate %} class="alert"{% endif %}><span class="label">{{ t.label }}</span><span class="figure">{{ t.text }}</span><span class="note">{{ t.dropped }} of {{ t.enrolled }} did not continue</span></div>
+  {% endfor %}
+  <div><span class="label">Over-age for their class</span><span class="figure">{{ overage_share }}%</span><span class="note">two or more years older than usual, a known early warning sign</span></div>
+</section>
+
+<section class="panel">
+  <h2>Dropout rate by class</h2>
+  <p class="lead">Marigold bars are at least one and a half times the overall rate.</p>
+  <div class="chart-box tall"><canvas data-chart="bar" data-source="class-chart" role="img" aria-label="Dropout by class"></canvas></div>
+  {{ chart|json_script:"class-chart" }}
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>By stage</h2>
+    <table class="data">
+      <thead><tr><th>Stage</th><th class="num">Students</th><th class="num">Left</th><th class="num">Rate</th></tr></thead>
+      <tbody>{% for s in stages %}<tr><td>{{ s.label }}</td><td class="num">{{ s.enrolled }}</td><td class="num">{{ s.dropped }}</td><td class="heat" style="{{ s.heat }}">{{ s.text }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </section>
+  <section class="panel">
+    <h2>Overall rate over the years</h2>
+    <div class="chart-box short"><canvas data-chart="line" data-source="std-trend" role="img" aria-label="Overall dropout by year"></canvas></div>
+    {{ trend|json_script:"std-trend" }}
+  </section>
+</div>
+{% endblock %}

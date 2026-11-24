@@ -1,0 +1,10 @@
+{% extends "base_public.html" %}
+{% block title %}Not allowed | DropWatch{% endblock %}
+{% block content %}
+<div class="error-page">
+  <p class="code">403</p>
+  <h1>Your account can't open this page</h1>
+  <p class="muted">{{ message|default:"It belongs to another district or school, or needs a role you don't have." }} Ask your state administrator if you need access.</p>
+  <p><a class="btn" href="{% url 'core:dashboard' %}">Go to the dashboard</a></p>
+</div>
+{% endblock %}

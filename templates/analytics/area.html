@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}By area{% endblock %}
+{% block heading %}Dropout by area{% endblock %}
+{% block subheading %}<p>Districts, blocks, and rural compared with urban schools.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'analytics:export' 'district' %}">Districts CSV</a><a class="btn secondary" href="{% url 'analytics:export' 'block' %}">Blocks CSV</a>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>District map of dropout</h2>
+  <p class="lead">Darker tiles lose more students. Select a district to filter every page to it.</p>
+  <div class="tiles">
+    {% for d in districts %}
+      <a class="tile" style="{{ d.heat }}" href="?district={{ d.school__block__district_id }}&year={{ year.pk }}">
+        <strong>{{ d.school__block__district__name }}</strong>
+        <span class="figure">{{ d.text }}</span>
+        <span class="small muted">{{ d.dropped }} of {{ d.enrolled }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Districts ranked</h2>
+    <div class="chart-box"><canvas data-chart="hbar" data-source="district-chart" role="img" aria-label="Dropout by district"></canvas></div>
+    {{ chart|json_script:"district-chart" }}
+  </section>
+  <section class="panel">
+    <h2>Rural and urban schools over time</h2>
+    <p class="lead">{% for a in areas %}{{ a.label }}: <strong>{{ a.text }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %} this year.</p>
+    <div class="chart-box short"><canvas data-chart="line" data-source="area-trend" role="img" aria-label="Rural and urban dropout by year"></canvas></div>
+    {{ trend|json_script:"area-trend" }}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Blocks</h2>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th class="rank">#</th><th>Block</th><th>District</th><th>Area</th><th class="num">Students</th><th class="num">Left</th><th>Rate</th></tr></thead>
+    <tbody>
+    {% for b in blocks %}
+      <tr>
+        <td class="rank">{{ forloop.counter }}</td>
+        <td>{{ b.school__block__name }}</td>
+        <td>{{ b.school__block__district__name }}</td>
+        <td><span class="tag">{% if b.school__area_type == "RURAL" %}Rural{% else %}Urban{% endif %}</span></td>
+        <td class="num">{{ b.enrolled }}</td>
+        <td class="num">{{ b.dropped }}</td>
+        <td><div class="bar-cell"><div class="bar{% if b.rate and overall.rate and b.rate >= overall.rate %} alert{% endif %}"><span style="width:{{ b.width }}%"></span></div><span class="val">{{ b.text }}</span></div></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

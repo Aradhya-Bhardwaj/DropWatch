@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Recommendations{% endblock %}
+{% block heading %}Recommendations{% endblock %}
+{% block subheading %}<p>Schemes proposed for hotspot groups, from proposal to measured result.</p>{% endblock %}
+{% block actions %}
+  {% if can_generate %}
+  <form method="post" action="{% url 'interventions:generate' %}">{% csrf_token %}<button class="btn" type="submit">Propose from current hotspots</button></form>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<nav class="tabs" aria-label="Status">
+  <a href="?" {% if not status %}aria-current="page"{% endif %}>All</a>
+  {% for code, label, n in statuses %}<a href="?status={{ code }}" {% if status == code %}aria-current="page"{% endif %}>{{ label }} ({{ n }})</a>{% endfor %}
+</nav>
+<section class="panel">
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Group</th><th>Scheme</th><th class="num">Students</th><th class="num">Rate in {{ recs.0.baseline_year|default:"baseline" }}</th><th>Status</th><th>Owner</th></tr></thead>
+    <tbody>
+    {% for r in recs %}
+      <tr>
+        <td><a href="{% url 'interventions:detail' r.pk %}">{{ r.segment_label }}</a></td>
+        <td>{{ r.scheme.name }}</td>
+        <td class="num">{{ r.students_in_segment }}</td>
+        <td class="num">{{ r.baseline_rate|floatformat:1 }}%</td>
+        <td>{% if r.status == "DONE" %}<span class="tag good">{{ r.get_status_display }}</span>{% elif r.status == "PROPOSED" %}<span class="tag alert">{{ r.get_status_display }}</span>{% elif r.status == "REJECTED" %}<span class="tag">{{ r.get_status_display }}</span>{% else %}<span class="tag ink">{{ r.get_status_display }}</span>{% endif %}</td>
+        <td class="muted">{{ r.owner.get_full_name|default:"Unassigned" }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6"><div class="empty"><h2>No recommendations yet</h2><p>Use “Propose from current hotspots” to match each district hotspot with a scheme.</p></div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

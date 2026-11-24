@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}By gender{% endblock %}
+{% block heading %}Dropout by gender{% endblock %}
+{% block subheading %}<p>Where girls and boys leave, and why their reasons differ.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'analytics:export' 'gender' %}">Download CSV</a>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="figures" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+  {% for g in genders %}
+  <div><span class="label">{{ g.label }}</span><span class="figure">{{ g.text }}</span><span class="note">{{ g.dropped }} of {{ g.enrolled }}</span></div>
+  {% endfor %}
+  {% if widest %}
+  <div class="alert"><span class="label">Widest gap</span><span class="figure">Class {{ widest.standard }}</span><span class="note">girls {{ widest.gap_text }} pts above boys</span></div>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Girls start leaving faster from Class 8</h2>
+  <p class="lead">Dropout rate by class for girls and boys.</p>
+  <div class="chart-box tall"><canvas data-chart="grouped" data-source="gender-chart" role="img" aria-label="Dropout by class and gender"></canvas></div>
+  {{ chart|json_script:"gender-chart" }}
+</section>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>Why girls left (Class 8 and above)</h2>
+    <table class="data"><tbody>
+      {% for r in girls_reasons %}<tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td style="width:45%"><div class="bar-cell"><div class="bar"><span style="width:{{ r.share }}%"></span></div><span class="val">{{ r.share }}%</span></div></td></tr>{% empty %}<tr><td class="muted">No dropouts recorded.</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+  <section class="panel">
+    <h2>Why boys left (Class 8 and above)</h2>
+    <table class="data"><tbody>
+      {% for r in boys_reasons %}<tr><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td style="width:45%"><div class="bar-cell"><div class="bar"><span style="width:{{ r.share }}%"></span></div><span class="val">{{ r.share }}%</span></div></td></tr>{% empty %}<tr><td class="muted">No dropouts recorded.</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+</div>
+
+<div class="grid-2">
+  <section class="panel">
+    <h2>By class</h2>
+    <table class="data">
+      <thead><tr><th>Class</th><th class="num">Girls</th><th class="num">Boys</th><th class="num">Gap</th></tr></thead>
+      <tbody>
+      {% for r in by_class %}
+        {% with f=r.F m=r.M %}
+        <tr><td>Class {{ r.standard }}</td>
+          <td class="heat" style="{{ f.heat }}">{{ f.text }}</td>
+          <td class="heat" style="{{ m.heat }}">{{ m.text }}</td>
+          <td class="num">{% if r.gap is not None %}<span class="{% if r.gap > 1 %}delta up{% endif %}">{{ r.gap_text }}</span>{% else %}–{% endif %}</td></tr>
+        {% endwith %}
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="panel">
+    <h2>Over the years</h2>
+    <div class="chart-box"><canvas data-chart="line" data-source="gender-trend" role="img" aria-label="Dropout by gender over years"></canvas></div>
+    {{ trend|json_script:"gender-trend" }}
+  </section>
+</div>
+{% endblock %}

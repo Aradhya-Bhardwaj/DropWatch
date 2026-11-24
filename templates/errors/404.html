@@ -1,0 +1,10 @@
+{% extends "base_public.html" %}
+{% block title %}Page not found | DropWatch{% endblock %}
+{% block content %}
+<div class="error-page">
+  <p class="code">404</p>
+  <h1>This page doesn't exist</h1>
+  <p class="muted">The link may be mistyped, or the school or record was removed. School pages use the 11-digit UDISE code, for example /analysis/schools/03010100001/.</p>
+  <p><a class="btn" href="{% url 'core:dashboard' %}">Go to the dashboard</a></p>
+</div>
+{% endblock %}

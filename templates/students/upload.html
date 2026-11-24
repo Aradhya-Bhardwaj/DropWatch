@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Upload students{% endblock %}
+{% block heading %}Upload students from a CSV file{% endblock %}
+{% block subheading %}<p>Adds students to the {{ year }} roll. Every row is checked first; nothing is saved until the whole file is correct.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'students:sample_csv' %}">Download the template</a>{% endblock %}
+
+{% block content %}
+{% if result %}
+<section class="panel">
+  <h2>{{ result.error_count }} problem{{ result.error_count|pluralize }} found in the file for {{ result.school }}</h2>
+  <p class="lead">{{ result.ok_count }} row{{ result.ok_count|pluralize }} passed. Fix the rows below in your spreadsheet and upload the file again.</p>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th class="num">Row</th><th>Column</th><th>Problem</th></tr></thead>
+    <tbody>{% for e in result.errors %}<tr><td class="num">{{ e.row }}</td><td>{{ e.field }}</td><td>{{ e.error }}</td></tr>{% endfor %}</tbody>
+  </table>
+  </div>
+</section>
+{% endif %}
+
+<div class="grid-3-1">
+  <section class="panel form">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+      <div class="form-actions"><button class="btn" type="submit">Check and import</button></div>
+    </form>
+  </section>
+  <aside class="panel">
+    <h2>Columns</h2>
+    <ul class="small" style="padding-left:18px;margin:0">
+      <li><code>student_uid</code>: PB and 10 digits</li>
+      <li><code>gender</code>: F or M</li>
+      <li><code>category</code>: GEN, OBC, SC or ST</li>
+      <li><code>date_of_birth</code>: YYYY-MM-DD</li>
+      <li><code>standard</code>: class, 1 to 12</li>
+      <li><code>income_band</code>: BPL, LOW or MID</li>
+      <li><code>distance_km</code>: home to school</li>
+      <li><code>is_cwsn</code>: yes or no</li>
+    </ul>
+  </aside>
+</div>
+{% endblock %}

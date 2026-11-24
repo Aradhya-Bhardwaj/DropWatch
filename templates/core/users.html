@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block heading %}Users{% endblock %}
+{% block subheading %}<p>Who can sign in, their role, and what they can see. Accounts are switched off, never deleted, so their records keep an author.</p>{% endblock %}
+{% block actions %}{% if perms.auth.add_user %}<a class="btn" href="{% url 'core:user_create' %}">Add a user</a>{% endif %}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Can see</th><th>Group</th><th>Last sign-in</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.get_full_name|default:"–" }}</td>
+        <td>{% if u.is_superuser %}Administrator{% else %}{{ u.profile.get_role_display|default:"No role" }}{% endif %}</td>
+        <td>{{ u.profile.scope_label|default:"–" }}</td>
+        <td class="muted small">{% for g in u.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}–{% endfor %}</td>
+        <td class="muted small">{{ u.last_login|date:"j M Y, H:i"|default:"Never" }}</td>
+        <td>{% if u.is_active %}<span class="tag good">Active</span>{% else %}<span class="tag">Switched off</span>{% endif %}</td>
+        <td>
+          {% if perms.auth.change_user and u != user and not u.is_superuser %}
+          <form method="post" action="{% url 'core:user_toggle' u.pk %}">{% csrf_token %}
+            <button class="btn small quiet" type="submit">{% if u.is_active %}Switch off{% else %}Switch on{% endif %}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

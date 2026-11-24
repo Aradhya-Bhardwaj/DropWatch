@@ -1,0 +1,19 @@
+{% extends "base_public.html" %}
+{% block title %}How DropWatch works{% endblock %}
+{% block content %}
+<section class="section-public" style="max-width:820px">
+  <h1>How DropWatch works</h1>
+  <p class="muted">The Right of Children to Free and Compulsory Education Act promises every child a place in school. Dropout is uneven: it gathers in particular schools, blocks, communities and classes. DropWatch shows where.</p>
+
+  <h2 style="margin-top:32px">How the dropout rate is counted</h2>
+  <p>For any group in a completed school year, the rate is the number of students who dropped out divided by the number enrolled. Students who moved to another school are left out of both numbers, because they are still studying.</p>
+  <p>Groups with fewer than 10 students are hidden, so no child can be identified from a rate. Hotspots need at least 30 students and a rate at least one and a half times the overall rate.</p>
+
+  <h2 style="margin-top:32px">What it adds to existing systems</h2>
+  <p>UDISE+ publishes yearly rates after children have left. DropWatch also watches attendance during the year, separates transfers from dropouts, flags data that hides dropouts, ranks groups across several dimensions at once, matches each group to a scheme, and measures whether the scheme worked against other districts.</p>
+
+  <h2 style="margin-top:32px">Who can see what</h2>
+  <p>State officers see every district. District officers see their own district. School staff see and edit their own school's students. Caste and income only ever appear as group totals.</p>
+  <p style="margin-top:28px"><a class="btn" href="{% url 'core:login' %}">Sign in</a></p>
+</section>
+{% endblock %}

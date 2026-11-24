@@ -1,0 +1,19 @@
+{% extends "base_public.html" %}
+{% block title %}Sign in | DropWatch{% endblock %}
+{% block content %}
+<div class="auth">
+  <h1>Sign in</h1>
+  <p class="muted">For education officers and school staff.</p>
+  <form method="post" class="form" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+    <button class="btn" type="submit" style="width:100%">Sign in</button>
+  </form>
+  <div class="demo-users">
+    <p>Demo accounts, all with the password <code>DropWatch@2026</code>:</p>
+    <p><code>state_officer</code> sees every district. <code>deo_firozpur</code> sees Firozpur only. <code>school_head</code> manages one school. <code>admin</code> can open the administration site.</p>
+  </div>
+</div>
+{% endblock %}

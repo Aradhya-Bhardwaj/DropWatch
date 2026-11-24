@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}By social category{% endblock %}
+{% block heading %}Dropout by social category{% endblock %}
+{% block subheading %}<p>General, OBC, SC and ST students. Shown only as group totals; groups under 10 are hidden.</p>{% endblock %}
+{% block actions %}<a class="btn secondary" href="{% url 'analytics:export' 'category' %}">Download CSV</a>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+  <section class="panel">
+    <h2>This year</h2>
+    <div class="chart-box"><canvas data-chart="bar" data-source="cat-chart" role="img" aria-label="Dropout by social category"></canvas></div>
+    {{ chart|json_script:"cat-chart" }}
+  </section>
+  <section class="panel">
+    <h2>Over the years</h2>
+    <div class="chart-box"><canvas data-chart="line" data-source="cat-trend" role="img" aria-label="Dropout by social category over years"></canvas></div>
+    {{ trend|json_script:"cat-trend" }}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Category and class</h2>
+  <p class="lead">Darker cells lose more students. Look across a row to see the class where each group starts to leave.</p>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Category</th>{% for c in matrix.cols %}<th class="num">{{ c }}</th>{% endfor %}<th class="num">All</th></tr></thead>
+    <tbody>
+    {% for r in matrix.rows %}
+      <tr><td>{{ r.label }}</td>
+        {% for cell in r.cells %}<td class="heat{% if not cell %} empty{% endif %}" style="{{ cell.heat }}">{% if cell %}{{ cell.text }}{% else %}–{% endif %}</td>{% endfor %}
+        <td class="num"><strong>{{ r.total.text }}</strong></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Top reasons in each group</h2>
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Category</th><th>Most common</th><th>Second</th><th>Third</th></tr></thead>
+    <tbody>
+    {% for g in reasons %}
+      <tr><td>{{ g.label }}</td>{% for r in g.reasons %}<td>{{ r.label }} <span class="muted small">{{ r.share }}%</span></td>{% endfor %}</tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+{% endblock %}

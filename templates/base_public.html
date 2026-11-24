@@ -1,0 +1,31 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DropWatch{% endblock %}</title>
+  <meta name="description" content="DropWatch shows where and why students drop out of school, and which schemes to fund.">
+  <link rel="preload" href="{% static 'fonts/hind-latin-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/dropwatch.css' %}">
+</head>
+<body>
+<div class="public">
+  <header class="public-top">
+    <a class="brand" href="{% url 'core:landing' %}">{% include "partials/brand_mark.html" %}<span class="brand-name">DropWatch</span></a>
+    <nav aria-label="Main">
+      <a href="{% url 'core:about' %}">How it works</a>
+      {% if user.is_authenticated %}
+        <a class="btn" href="{% url 'core:dashboard' %}">Open dashboard</a>
+      {% else %}
+        <a class="btn" href="{% url 'core:login' %}">Sign in</a>
+      {% endif %}
+    </nav>
+  </header>
+  {% include "partials/messages.html" %}
+  {% block content %}{% endblock %}
+  <footer class="public-foot">
+    DropWatch is a student project for Right to Education monitoring. The figures on this site come from synthetic demo data, not real students.
+  </footer>
+</div>
+</body>
+</html>

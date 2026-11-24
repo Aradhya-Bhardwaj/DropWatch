@@ -1,0 +1,41 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashboard{% endblock %} | DropWatch</title>
+  <link rel="preload" href="{% static 'fonts/hind-latin-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/dropwatch.css' %}">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'core:dashboard' %}">{% include "partials/brand_mark.html" %}<span class="brand-name">DropWatch</span></a>
+    <details class="nav-toggle"><summary>Menu</summary><div class="nav-body">{% include "partials/nav.html" %}</div></details>
+    <div class="sidebar-wide">{% include "partials/nav.html" %}</div>
+  </aside>
+
+  <main class="main" id="main">
+    {% if show_demo_notice %}
+      <div class="demo-notice" role="note">
+        <span>You are looking at synthetic demo data for 8 districts of Punjab. No real student is shown.</span>
+        <a href="{% url 'core:dismiss_notice' %}?next={{ request.path|urlencode }}">Hide this</a>
+      </div>
+    {% endif %}
+    {% include "partials/messages.html" %}
+    <div class="page-head">
+      <div>
+        <h1>{% block heading %}{% endblock %}</h1>
+        {% block subheading %}{% endblock %}
+      </div>
+      <div class="page-actions">{% block actions %}{% endblock %}</div>
+    </div>
+    {% block filters %}{% endblock %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="{% static 'vendor/chart.umd.js' %}"></script>
+<script src="{% static 'js/charts.js' %}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

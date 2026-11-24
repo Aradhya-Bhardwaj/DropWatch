@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ rec.scheme.name }}{% endblock %}
+{% block heading %}{{ rec.scheme.name }}{% endblock %}
+{% block subheading %}<p>Group: {{ rec.segment_label }}. Status: <strong>{{ rec.get_status_display }}</strong>.</p>{% endblock %}
+
+{% block content %}
+<section class="figures">
+  <div><span class="label">Rate in {{ rec.baseline_year }}</span><span class="figure">{{ rec.baseline_rate|floatformat:1 }}%</span><span class="note">when it was proposed</span></div>
+  <div><span class="label">Students in the group</span><span class="figure">{{ rec.students_in_segment }}</span><span class="note">in {{ rec.baseline_year }}</span></div>
+  <div><span class="label">Estimated yearly cost</span><span class="figure">₹{{ cost|floatformat:"0g" }}</span><span class="note">₹{{ rec.scheme.cost_per_student|floatformat:"0g" }} per student</span></div>
+  {% if impact.verdict %}
+  <div class="{% if impact.verdict.effect < 0 %}{% else %}alert{% endif %}"><span class="label">Effect by {{ impact.verdict.year }}</span>
+    <span class="figure" style="color:{% if impact.verdict.effect < 0 %}var(--teal){% else %}var(--rust){% endif %}">{{ impact.verdict.effect_text }} pts</span>
+    <span class="note">about {{ impact.verdict.students_kept }} more students kept in school</span></div>
+  {% else %}
+  <div><span class="label">Effect</span><span class="figure">–</span><span class="note">measured once a school year has finished after the start</span></div>
+  {% endif %}
+</section>
+
+<div class="grid-3-1">
+  <section class="panel">
+    <h2>Did it work?</h2>
+    {% if impact.verdict %}
+      <p class="lead">Dropout for this group in {{ rec.district.name }} changed by <strong>{{ impact.verdict.target_change_text }} points</strong>. The same group in other districts changed by {{ impact.verdict.comparison_change_text }} points. The difference, <strong>{{ impact.verdict.effect_text }} points</strong>, is the scheme's likely effect.</p>
+    {% else %}
+      <p class="lead">The chart compares this group with the same group in other districts. The effect appears after the first full school year of the scheme.</p>
+    {% endif %}
+    <div class="chart-box"><canvas data-chart="line" data-source="impact-trend" role="img" aria-label="Dropout for this group compared with other districts"></canvas></div>
+    {{ trend|json_script:"impact-trend" }}
+    <div class="table-wrap" style="margin-top:12px">
+    <table class="data">
+      <thead><tr><th>Year</th><th class="num">{{ rec.district.name }}</th><th class="num">Other districts</th><th></th></tr></thead>
+      <tbody>{% for r in impact.rows %}<tr><td>{{ r.year }}</td><td class="num">{{ r.target.text }}</td><td class="num">{{ r.comparison.text }}</td><td>{% if r.is_baseline %}<span class="tag">Baseline</span>{% elif r.after %}<span class="tag good">Scheme running</span>{% endif %}</td></tr>{% endfor %}</tbody>
+    </table>
+    </div>
+  </section>
+
+  <div>
+    {% if can_act %}
+    <section class="panel">
+      <h2>Update</h2>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}{% include "partials/field.html" %}{% endfor %}
+        <button class="btn" type="submit">Save update</button>
+      </form>
+    </section>
+    {% endif %}
+    <section class="panel">
+      <h2>History</h2>
+      <ul class="timeline">
+        {% for a in actions %}
+          <li><strong>{{ a.get_status_after_display }}</strong> <span class="muted small">{{ a.created|date:"j M Y" }}, {{ a.user.get_full_name|default:a.user.username }}</span><br>{{ a.note }}</li>
+        {% empty %}<li class="muted">Proposed {{ rec.created|date:"j M Y" }}. No updates yet.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>About the scheme</h2>
+      <p class="small">{{ rec.scheme.description }}</p>
+      <p class="small muted">{{ rec.scheme.get_level_display }} scheme</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Hotspots{% endblock %}
+{% block heading %}Hotspots{% endblock %}
+{% block subheading %}<p>Groups of 30 or more students whose dropout is at least 1.5× the overall rate of {{ overall.text }}, ranked by rate and size.</p>{% endblock %}
+{% block actions %}
+  {% if perms.interventions.add_recommendation %}
+  <form method="post" action="{% url 'interventions:generate' %}">{% csrf_token %}<button class="btn" type="submit">Propose recommendations</button></form>
+  {% endif %}
+{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  {% if spots %}
+  <ol class="spot-list">
+    {% for h in spots %}
+    <li class="spot">
+      <span class="n">{{ forloop.counter }}</span>
+      <div><h3>{{ h.label }}</h3><span class="meta">{{ h.dropped }} of {{ h.enrolled }} students left</span></div>
+      <div class="rate"><span class="figure">{{ h.rate }}%</span><br><span class="tag alert">{{ h.times }}× overall</span></div>
+      <div class="detail">
+        <div><strong>Top reasons</strong>
+          <ul>{% for r in h.reasons %}<li>{{ r.label }} <span class="muted">{{ r.share }}%</span></li>{% empty %}<li class="muted">None recorded</li>{% endfor %}</ul>
+        </div>
+        <div><strong>Suggested schemes</strong>
+          <ul>{% for m in h.schemes %}<li>{{ m.scheme.name }}{% if m.why %} <span class="muted small">({{ m.why }})</span>{% endif %}</li>{% empty %}<li class="muted">No rule matches. Add one under Schemes and rules.</li>{% endfor %}</ul>
+          {% if not h.has_district %}<p class="muted small" style="margin:6px 0 0">State-wide group: filter by district to turn it into a recommendation.</p>{% endif %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+    <div class="empty"><h2>No hotspots for these filters</h2><p>No group of 30 or more students is far above the overall rate. Try a wider filter.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

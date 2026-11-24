@@ -1,0 +1,35 @@
+<nav class="nav" aria-label="Sections">
+  <div class="nav-group">
+    <a href="{% url 'core:dashboard' %}" {% if section == 'dashboard' %}aria-current="page"{% endif %}>Overview</a>
+    <a href="{% url 'analytics:hotspots' %}" {% if section == 'hotspots' %}aria-current="page"{% endif %}>Hotspots</a>
+    <a href="{% url 'analytics:watchlist' %}" {% if section == 'watchlist' %}aria-current="page"{% endif %}>Attendance watchlist</a>
+  </div>
+  <div class="nav-group">
+    <p>Dropout by</p>
+    <a href="{% url 'analytics:schools' %}" {% if section == 'schools' %}aria-current="page"{% endif %}>School</a>
+    <a href="{% url 'analytics:area' %}" {% if section == 'area' %}aria-current="page"{% endif %}>Area</a>
+    <a href="{% url 'analytics:gender' %}" {% if section == 'gender' %}aria-current="page"{% endif %}>Gender</a>
+    <a href="{% url 'analytics:caste' %}" {% if section == 'caste' %}aria-current="page"{% endif %}>Social category</a>
+    <a href="{% url 'analytics:standard' %}" {% if section == 'standard' %}aria-current="page"{% endif %}>Class and age</a>
+    <a href="{% url 'analytics:explore' %}" {% if section == 'explore' %}aria-current="page"{% endif %}>Compare any two</a>
+  </div>
+  <div class="nav-group">
+    <p>Act</p>
+    <a href="{% url 'interventions:list' %}" {% if section == 'interventions' %}aria-current="page"{% endif %}>Recommendations</a>
+    <a href="{% url 'interventions:schemes' %}" {% if section == 'schemes' %}aria-current="page"{% endif %}>Schemes and rules</a>
+  </div>
+  <div class="nav-group">
+    <p>Records</p>
+    <a href="{% url 'students:list' %}" {% if section == 'students' %}aria-current="page"{% endif %}>Students</a>
+    {% if perms.students.add_student %}<a href="{% url 'students:upload' %}" {% if section == 'upload' %}aria-current="page"{% endif %}>Upload students</a>{% endif %}
+    <a href="{% url 'analytics:quality' %}" {% if section == 'quality' %}aria-current="page"{% endif %}>Data quality</a>
+    {% if perms.auth.view_user %}<a href="{% url 'core:users' %}" {% if section == 'users' %}aria-current="page"{% endif %}>Users</a>{% endif %}
+    {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administration</a>{% endif %}
+  </div>
+</nav>
+<div class="sidebar-foot">
+  <strong>{{ user.get_full_name|default:user.username }}</strong>
+  {% if user_profile %}{{ user_profile.get_role_display }}<br><span style="color:#9fabcf">{{ user_profile.scope_label }}</span>{% endif %}
+  <a class="link-button" href="{% url 'core:password' %}" style="display:inline-block;margin-top:10px">Change password</a>
+  <form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="link-button" type="submit">Sign out</button></form>
+</div>

@@ -1,0 +1,5 @@
+{% if flash %}
+<ul class="messages" role="status">
+  {% for m in flash %}<li class="{{ m.level }}">{{ m.text }}</li>{% endfor %}
+</ul>
+{% endif %}

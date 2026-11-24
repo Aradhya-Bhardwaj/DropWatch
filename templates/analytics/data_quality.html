@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Data quality{% endblock %}
+{% block heading %}Data quality{% endblock %}
+{% block subheading %}<p>Records that can hide real dropouts. Fix these first, or the rates on every other page are too low.</p>{% endblock %}
+
+{% block content %}
+<section class="figures">
+  {% for c in checks %}
+  <div{% if c.count %} class="alert"{% endif %}><span class="label">{{ c.title }}</span><span class="figure">{{ c.count }}</span><a class="note" href="#{{ c.key }}">Details</a></div>
+  {% endfor %}
+</section>
+
+{% for c in checks %}
+<section class="panel" id="{{ c.key }}">
+  <h2>{{ c.title }}</h2>
+  <p class="lead">{{ c.explain }}</p>
+  {% if c.rows %}
+  <div class="table-wrap">
+  <table class="data">
+    <thead><tr>{% for h in c.columns %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+    <tbody>
+    {% for r in c.rows %}
+      {% if c.key == "untraced" %}
+        <tr><td>{{ r.student.name }} <span class="muted small">{{ r.student.student_uid }}</span></td><td>{{ r.year }}</td><td>{{ r.from.name }}</td><td>{{ r.to.name|default:"Not given" }}</td></tr>
+      {% elif c.key == "unknown" %}
+        <tr><td><a href="{% url 'analytics:school_detail' r.enrollment__school__udise_code %}">{{ r.enrollment__school__name }}</a></td><td>{{ r.enrollment__year__label }}</td><td>{{ r.n }}</td></tr>
+      {% else %}
+        <tr><td><a href="{% url 'analytics:school_detail' r.school__udise_code %}">{{ r.school__name }}</a></td><td>{{ r.year }}</td><td>{{ r.n }}</td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if c.count > c.rows|length %}<p class="panel-foot muted">Showing the first {{ c.rows|length }} of {{ c.count }}.</p>{% endif %}
+  {% else %}
+    <p class="tag good">No problems found</p>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}

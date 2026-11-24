@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block heading %}Dropout overview{% endblock %}
+{% block subheading %}<p>{{ year }} school year{% if user_profile %}, {{ user_profile.scope_label }}{% endif %}</p>{% endblock %}
+{% block filters %}{% include "partials/filters.html" %}{% endblock %}
+
+{% block content %}
+<section class="figures" aria-label="Headline figures">
+  <div>
+    <span class="label">Dropout rate</span>
+    <span class="figure">{{ overall.text }}</span>
+    <span class="note">{{ overall.dropped|floatformat:"0g" }} of {{ overall.enrolled|floatformat:"0g" }} students.
+      {% if change is not None %}<span class="delta {% if change > 0 %}up{% else %}down{% endif %}">{{ change_text }} pts</span> since {{ prev }}{% endif %}</span>
+  </div>
+  <div>
+    <span class="label">Girls' dropout rate</span>
+    <span class="figure">{{ girls.text }}</span>
+    <span class="note">Boys: {{ boys.text }}</span>
+  </div>
+  <div class="alert">
+    <span class="label">Watchlist this year</span>
+    <span class="figure">{{ watch_count }}</span>
+    <span class="note">students below 60% attendance for 3 months. <a href="{% url 'analytics:watchlist' %}">See who</a></span>
+  </div>
+  <div>
+    <span class="label">Recommendations open</span>
+    <span class="figure">{{ open_recs }}</span>
+    <span class="note">{{ recs_done }} implemented. <a href="{% url 'interventions:list' %}">Review them</a></span>
+  </div>
+</section>
+
+<div class="grid-3-1">
+  <section class="panel">
+    <h2>Dropout climbs at the end of Class 8 and Class 10</h2>
+    <p class="lead">Rate by class. Bars in marigold are at least one and a half times the overall rate.</p>
+    <div class="chart-box"><canvas data-chart="bar" data-source="class-chart" role="img" aria-label="Dropout rate by class"></canvas></div>
+    {{ class_chart|json_script:"class-chart" }}
+    <p class="panel-foot"><a href="{% url 'analytics:standard' %}">Class and age analysis</a></p>
+  </section>
+  <section class="panel">
+    <h2>By stage</h2>
+    <p class="lead">Share of each stage's students who left.</p>
+    {% for s in stages %}
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between"><span>{{ s.label }}</span><strong>{{ s.text }}</strong></div>
+        <div class="bar{% if s.rate and overall.rate and s.rate >= overall.rate %} alert{% endif %}"><span style="width:{{ s.width }}%"></span></div>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+
+<div class="grid-3-1">
+  <section class="panel">
+    <h2>Top hotspots</h2>
+    <p class="lead">Groups of 30 or more students with the highest dropout, ranked by rate and size.</p>
+    {% if spots %}
+    <ol class="spot-list">
+      {% for h in spots %}
+      <li class="spot">
+        <span class="n">{{ forloop.counter }}</span>
+        <div><h3>{{ h.label }}</h3><span class="meta">{{ h.dropped }} of {{ h.enrolled }} students left, {{ h.times }}× the overall rate</span></div>
+        <div class="rate"><span class="figure">{{ h.rate }}%</span></div>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="panel-foot"><a href="{% url 'analytics:hotspots' %}">All hotspots with suggested schemes</a></p>
+    {% else %}
+      <div class="empty"><p>No group stands out for these filters. Every group is close to the overall rate.</p></div>
+    {% endif %}
+  </section>
+  <div>
+    <section class="panel">
+      <h2>Why students left</h2>
+      <p class="lead">Share of dropouts by recorded reason.</p>
+      <div class="chart-box short"><canvas data-chart="share" data-source="reason-chart" role="img" aria-label="Reasons for dropping out"></canvas></div>
+      {{ reason_chart|json_script:"reason-chart" }}
+    </section>
+    <section class="panel">
+      <h2>Districts</h2>
+      <table class="data">
+        <tbody>
+        {% for d in districts %}
+          <tr><td>{{ d.school__block__district__name }}</td><td class="num">{{ d.text }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="panel-foot"><a href="{% url 'analytics:area' %}">Area analysis</a></p>
+    </section>
+    {% if recent_schools %}
+    <section class="panel">
+      <h2>Recently viewed schools</h2>
+      <ul style="margin:0;padding-left:18px">
+        {% for code, name in recent_schools %}<li><a href="{% url 'analytics:school_detail' code %}">{{ name }}</a></li>{% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
