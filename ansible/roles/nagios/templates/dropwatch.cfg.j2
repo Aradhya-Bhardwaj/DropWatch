@@ -9,13 +9,13 @@ define host {
 define service {
     use                 generic-service
     host_name           dropwatch-app
-    service_description HTTP (DropWatch homepage)
-    check_command       check_http!-H {{ groups['app'][0] }} -u /
+    service_description DropWatch homepage
+    check_command       check_http!--url=/
 }
 
 define service {
     use                 generic-service
     host_name           dropwatch-app
-    service_description HTTP login page
-    check_command       check_http!-H {{ groups['app'][0] }} -u /login/ -e 200
+    service_description DropWatch login page
+    check_command       check_http!--url=/login/
 }

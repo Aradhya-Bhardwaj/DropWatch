@@ -1,10 +1,20 @@
 - name: Install packages
   apt:
-    name: [git, python3-venv, python3-pip, nginx]
+    name: [git, acl, python3-venv, python3-pip, nginx]
     update_cache: true
 
 - name: Create app user
-  user: { name: dropwatch, system: true, home: "{{ app_dir }}", shell: /usr/sbin/nologin }
+  user: { name: dropwatch, system: true, home: /home/dropwatch, create_home: true, shell: /usr/sbin/nologin }
+
+- name: Remove stale Ansible temp dir left inside the app dir
+  file: { path: "{{ app_dir }}/.ansible", state: absent }
+
+- name: App directory owned by app user
+  file: { path: "{{ app_dir }}", state: directory, owner: dropwatch, group: dropwatch, mode: "0755" }
+
+- name: Clear leftover files from a failed first run (only if not yet cloned)
+  shell: find {{ app_dir }} -mindepth 1 -delete
+  args: { creates: "{{ app_dir }}/.git" }
 
 - name: Clone / update code
   git:
