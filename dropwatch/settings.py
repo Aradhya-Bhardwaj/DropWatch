@@ -21,14 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-s-t(f@09eck2t@w1nwi!xc7dtvh1@^1jbj!po(_5$&-i9yk3)w"
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-dev-only-key-change-in-production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Debugging (Unit III): DEBUG = True shows Django's detailed error pages while developing.
 # Run with DJANGO_DEBUG=0 to see the custom 403/404/500 pages users would see.
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver", "[::1]", "*"]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver,[::1]").split(",")
 
 
 # Application definition

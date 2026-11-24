@@ -1,0 +1,21 @@
+define host {
+    use                 linux-server
+    host_name           dropwatch-app
+    alias               DropWatch app server
+    address             {{ groups['app'][0] }}
+    check_command       check_tcp!80
+}
+
+define service {
+    use                 generic-service
+    host_name           dropwatch-app
+    service_description HTTP (DropWatch homepage)
+    check_command       check_http!-H {{ groups['app'][0] }} -u /
+}
+
+define service {
+    use                 generic-service
+    host_name           dropwatch-app
+    service_description HTTP login page
+    check_command       check_http!-H {{ groups['app'][0] }} -u /login/ -e 200
+}
