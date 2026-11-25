@@ -1,4 +1,0 @@
-- name: restart nagios
-  systemd: { name: nagios4, state: restarted }
-- name: restart apache
-  systemd: { name: apache2, state: restarted }
